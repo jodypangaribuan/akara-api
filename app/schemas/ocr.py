@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class OCRRequest(BaseModel):
-    image_path: str
+    image_base64: str
     languages: list[str] = ["en"]
 
 
@@ -19,5 +19,5 @@ class TextLine(BaseModel):
 
 
 class OCRResponse(BaseModel):
-    image_path: str
+    image_base64: str
     lines: list[TextLine]

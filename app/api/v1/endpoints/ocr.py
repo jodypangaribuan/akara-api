@@ -8,5 +8,5 @@ router = APIRouter()
 
 @router.post("/extract", response_model=OCRResponse)
 def extract_text(request: OCRRequest):
-    """Extract text from an image using Surya OCR."""
-    return OCRService.extract(request.image_path, request.languages)
+    """Extract text from a base64 encoded image and return annotated image with results."""
+    return OCRService.extract(request.image_base64, request.languages)

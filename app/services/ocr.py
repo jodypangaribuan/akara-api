@@ -1,6 +1,9 @@
+import base64
+import io
+
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 from surya.ocr import run_ocr
 from surya.model.detection.model import load_model as load_det_model, load_processor as load_det_processor
 from surya.model.recognition.model import load_model as load_rec_model
@@ -29,15 +32,16 @@ def _get_models():
 
 class OCRService:
     @staticmethod
-    def extract(image_path: str, languages: list[str]) -> OCRResponse:
-        path = Path(image_path)
-        if not path.exists():
-            raise FileNotFoundError(f"Image not found: {image_path}")
-
+    def extract(image_base64: str, languages: list[str]) -> OCRResponse:
         try:
-            image = Image.open(path)
+            # Handle potential Data URI prefix (e.g. data:image/jpeg;base64,...)
+            if "," in image_base64:
+                image_base64 = image_base64.split(",")[1]
+            
+            img_data = base64.b64decode(image_base64)
+            image = Image.open(io.BytesIO(img_data)).convert("RGB")
         except Exception as e:
-            raise OCRProcessingError(f"Failed to open image: {e}")
+            raise OCRProcessingError(f"Failed to decode base64 image: {e}")
 
         det_processor, det_model, rec_model, rec_processor = _get_models()
 
@@ -51,6 +55,8 @@ class OCRService:
             raise OCRProcessingError(f"OCR failed: {e}")
 
         lines = []
+        draw = ImageDraw.Draw(image)
+
         if predictions and len(predictions) > 0:
             for text_line in predictions[0].text_lines:
                 bbox = text_line.bbox
@@ -61,5 +67,15 @@ class OCRService:
                         x2=bbox[2], y2=bbox[3],
                     ),
                 ))
+                # Draw the bounding box on the image (red outline)
+                draw.rectangle(
+                    [bbox[0], bbox[1], bbox[2], bbox[3]], 
+                    outline="red", width=2
+                )
 
-        return OCRResponse(image_path=image_path, lines=lines)
+        # Encode the annotated image back to base64
+        buffered = io.BytesIO()
+        image.save(buffered, format="JPEG")
+        annotated_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+        return OCRResponse(image_base64=annotated_base64, lines=lines)
