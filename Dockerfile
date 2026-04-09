@@ -11,7 +11,9 @@ COPY requirements.txt .
 
 RUN pip install --default-timeout=1000 --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
+RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt && \
+    sed -i 's/kwargs.pop("encoder")/kwargs.pop("encoder", None)/g' /usr/local/lib/python3.11/site-packages/surya/model/recognition/config.py && \
+    sed -i 's/kwargs.pop("decoder")/kwargs.pop("decoder", None)/g' /usr/local/lib/python3.11/site-packages/surya/model/recognition/config.py
 
 COPY . .
 
