@@ -13,6 +13,9 @@ RUN pip install --default-timeout=1000 --no-cache-dir torch torchvision --index-
 
 RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
 
+# Fix Surya config bug by overwriting it with the working version from local
+COPY patch_surya_config.py /usr/local/lib/python3.11/site-packages/surya/model/recognition/config.py
+
 COPY . .
 
 EXPOSE 29999
