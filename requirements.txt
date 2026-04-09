@@ -3,5 +3,5 @@ uvicorn
 pydantic
 pydantic-settings
 python-multipart
-surya-ocr
+surya-ocr==0.6.2
 Pillow
