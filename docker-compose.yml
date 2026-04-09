@@ -1,0 +1,14 @@
+services:
+  akara-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - model-cache:/root/.cache
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  model-cache:

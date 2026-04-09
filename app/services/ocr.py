@@ -56,7 +56,6 @@ class OCRService:
                 bbox = text_line.bbox
                 lines.append(TextLine(
                     text=text_line.text,
-                    confidence=text_line.confidence,
                     bbox=BoundingBox(
                         x1=bbox[0], y1=bbox[1],
                         x2=bbox[2], y2=bbox[3],
