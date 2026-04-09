@@ -2,9 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# System deps for Pillow
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc libjpeg-dev zlib1g-dev && \
+    apt-get install -y --no-install-recommends gcc libjpeg-dev zlib1g-dev \
+    libgl1 libglib2.0-0 libsm6 libxext6 libxrender-dev libxcb1 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
