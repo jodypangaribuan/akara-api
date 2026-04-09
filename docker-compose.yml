@@ -2,7 +2,7 @@ services:
   akara-api:
     build: .
     ports:
-      - "8000:8000"
+      - "29999:29999"
     volumes:
       - ./:/app
       - model-cache:/root/.cache
