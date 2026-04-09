@@ -4,4 +4,5 @@ pydantic
 pydantic-settings
 python-multipart
 surya-ocr==0.6.2
+transformers<4.38.0
 Pillow
