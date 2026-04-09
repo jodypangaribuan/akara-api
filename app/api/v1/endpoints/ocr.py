@@ -1,12 +1,20 @@
-from fastapi import APIRouter
+from typing import Annotated
 
-from app.schemas.ocr import OCRRequest, OCRResponse
+from fastapi import APIRouter, File, Form, UploadFile, Request
+
+from app.schemas.ocr import OCRResponse
 from app.services.ocr import OCRService
 
 router = APIRouter()
 
 
 @router.post("/extract", response_model=OCRResponse)
-def extract_text(request: OCRRequest):
-    """Extract text from a base64 encoded image and return annotated image with results."""
-    return OCRService.extract(request.image_base64, request.languages)
+def extract_text(
+    request: Request,
+    file: Annotated[UploadFile, File(...)],
+    languages: Annotated[list[str], Form()] = ["en"],
+):
+    """Extract text from an uploaded image and return annotated image with results."""
+    # Fast hardcoded detection for production
+    base_url = "https://api.jodypangaribuan.my.id" if "jody" in str(request.base_url) else str(request.base_url).rstrip("/")
+    return OCRService.extract(file.file, file.filename, languages, base_url)

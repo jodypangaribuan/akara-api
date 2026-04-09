@@ -33,19 +33,17 @@ def _get_models():
 
 class OCRService:
     @staticmethod
-    def extract(image_base64: str, languages: list[str]) -> OCRResponse:
+    def extract(file_obj, filename: str, languages: list[str], base_url: str) -> OCRResponse:
         try:
-            # Handle potential Data URI prefix (e.g. data:image/jpeg;base64,...)
-            if "," in image_base64:
-                image_base64 = image_base64.split(",")[1]
+            image = Image.open(file_obj)
+            image.load()
             
-            # Fix incorrect padding by adding missing '=' signs
-            image_base64 += "=" * ((4 - len(image_base64) % 4) % 4)
-            
-            img_data = base64.b64decode(image_base64)
-            image = Image.open(io.BytesIO(img_data)).convert("RGB")
+            # Make sure it's writable/drawable RGB
+            if image.mode != "RGB":
+                image = image.convert("RGB")
+                
         except Exception as e:
-            raise OCRProcessingError(f"Failed to decode base64 image: {e}")
+            raise OCRProcessingError(f"Failed to open uploaded image: {e}")
 
         det_processor, det_model, rec_model, rec_processor = _get_models()
 
@@ -77,9 +75,16 @@ class OCRService:
                     outline="red", width=2
                 )
 
-        # Encode the annotated image back to base64
-        buffered = io.BytesIO()
-        image.save(buffered, format="JPEG")
-        annotated_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        import uuid
+        # Generate unique public file name
+        unique_id = str(uuid.uuid4())
+        save_filename = f"{unique_id}.jpg"
+        save_path = f"static/results/{save_filename}"
+        
+        # Save image physically
+        image.save(save_path, format="JPEG", quality=85)
+        
+        # Construct output public URL
+        public_url = f"{base_url}/static/results/{save_filename}"
 
-        return OCRResponse(image_base64=annotated_base64, lines=lines)
+        return OCRResponse(image_url=public_url, lines=lines)
