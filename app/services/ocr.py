@@ -38,6 +38,9 @@ class OCRService:
             if "," in image_base64:
                 image_base64 = image_base64.split(",")[1]
             
+            # Fix incorrect padding by adding missing '=' signs
+            image_base64 += "=" * ((4 - len(image_base64) % 4) % 4)
+            
             img_data = base64.b64decode(image_base64)
             image = Image.open(io.BytesIO(img_data)).convert("RGB")
         except Exception as e:
